@@ -173,26 +173,21 @@ h1 {
 }
 
 .egg-face {
-  width: 110px;
+  width: 140px;
   height: 140px;
+  border-radius: 50%;
+  border: 4px solid rgba(53, 50, 71, 0.12);
+  box-shadow: 0 10px 25px rgba(53, 50, 71, 0.12);
+  padding: 6px;
   background: #fffdf7;
-  border-radius: 50% 50% 45% 45%;
-  border: 3px solid rgba(53, 50, 71, 0.1);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 10px 25px rgba(53, 50, 71, 0.1);
 }
 
-.eyes {
-  font-size: 1.25rem;
-  letter-spacing: 0.2em;
-}
-
-.mouth {
-  margin-top: -0.3rem;
-  font-size: 1.4rem;
+.egg-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
 }
 
 .time-display {
