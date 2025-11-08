@@ -1,7 +1,7 @@
 const chips = document.querySelectorAll('.chip');
-const customSlider = document.getElementById('customMinutes');
-const customLabel = document.getElementById('customLabel');
-const customUnit = document.getElementById('customUnit');
+const customMinutesInput = document.getElementById('customMinutes');
+const customSecondsInput = document.getElementById('customSeconds');
+const customHint = document.getElementById('customHint');
 const timeDisplay = document.getElementById('timeDisplay');
 const statusText = document.getElementById('statusText');
 const startBtn = document.getElementById('startBtn');
@@ -37,13 +37,6 @@ noteField.addEventListener('input', () => {
 });
 
 const minutesToSeconds = (minutes) => minutes * 60 * timeScale;
-const formatMinutes = (minutes) => {
-  const rounded = Number(minutes);
-  return Number.isInteger(rounded) ? `${rounded}` : `${rounded.toFixed(1).replace(/\\.0$/, '')}`;
-};
-const setCustomLabelValue = (minutes) => {
-  customLabel.textContent = isDebugMode ? Math.round(minutesToSeconds(minutes)) : formatMinutes(minutes);
-};
 const updateChipBadges = () => {
   chips.forEach((chip) => {
     const tag = chip.querySelector('small');
@@ -87,6 +80,29 @@ const setStatus = (text) => {
   statusText.textContent = text;
 };
 
+const clampSeconds = (seconds) => {
+  if (Number.isNaN(seconds)) return 0;
+  return Math.min(Math.max(seconds, 0), 59);
+};
+
+const minutesFromInputs = () => {
+  const mins = Math.max(0, Number(customMinutesInput.value) || 0);
+  const secs = clampSeconds(Number(customSecondsInput.value) || 0);
+  customSecondsInput.value = secs;
+  return mins + secs / 60;
+};
+
+const setCustomInputs = (minutes) => {
+  let mins = Math.floor(minutes);
+  let secs = Math.round((minutes - mins) * 60);
+  if (secs === 60) {
+    mins += 1;
+    secs = 0;
+  }
+  customMinutesInput.value = mins;
+  customSecondsInput.value = secs;
+};
+
 const selectPreset = (minutes) => {
   totalSeconds = Math.round(minutesToSeconds(minutes));
   remainingSeconds = totalSeconds;
@@ -95,8 +111,7 @@ const selectPreset = (minutes) => {
   chips.forEach((chip) => {
     chip.setAttribute('aria-pressed', chip.dataset.minutes === minutes.toString());
   });
-  customSlider.value = minutes;
-  setCustomLabelValue(minutes);
+  setCustomInputs(minutes);
   stopTimer();
 };
 
@@ -227,8 +242,7 @@ chips.forEach((chip) => {
     chips.forEach((c) => c.setAttribute('aria-pressed', 'false'));
     chip.setAttribute('aria-pressed', 'true');
     const mins = Number(chip.dataset.minutes);
-    customSlider.value = mins;
-    setCustomLabelValue(mins);
+    setCustomInputs(mins);
     pausedAt = 0;
     totalSeconds = minutesToSeconds(mins);
     remainingSeconds = totalSeconds;
@@ -240,11 +254,10 @@ chips.forEach((chip) => {
   });
 });
 
-customSlider.addEventListener('input', (event) => {
-  const mins = Number(event.target.value);
-  setCustomLabelValue(mins);
+const handleCustomInput = () => {
+  const minutes = minutesFromInputs();
   chips.forEach((c) => c.setAttribute('aria-pressed', 'false'));
-  totalSeconds = minutesToSeconds(mins);
+  totalSeconds = minutesToSeconds(minutes);
   remainingSeconds = totalSeconds;
   pausedAt = 0;
   updateDisplay();
@@ -252,7 +265,10 @@ customSlider.addEventListener('input', (event) => {
   resetBtn.disabled = true;
   cancelAnimationFrame(timerId);
   timerId = null;
-});
+};
+
+customMinutesInput.addEventListener('input', handleCustomInput);
+customSecondsInput.addEventListener('input', handleCustomInput);
 
 startBtn.addEventListener('click', () => {
   if (remainingSeconds <= 0) {
@@ -271,18 +287,17 @@ resetBtn.disabled = true;
 
 if (isDebugMode) {
   document.body.classList.add('debug-mode');
-  if (customUnit) customUnit.textContent = 'sec';
+  if (customHint) customHint.textContent = 'minutes + seconds (scaled)';
   const banner = document.createElement('p');
   banner.className = 'debug-banner';
   banner.textContent = `Debug mode: timers scaled so medium preset ≈ ${Math.round(debugSeconds)} sec. Remove '?debug' to return to minutes.`;
   card?.insertAdjacentElement('afterbegin', banner);
   setStatus('Debug mode active — perfect for rapid testing.');
-} else if (customUnit) {
-  customUnit.textContent = 'min';
+} else if (customHint) {
+  customHint.textContent = 'minutes + seconds';
 }
 
-customSlider.value = defaultMinutes;
-setCustomLabelValue(defaultMinutes);
+setCustomInputs(defaultMinutes);
 updateChipBadges();
 
 if ('serviceWorker' in navigator) {
