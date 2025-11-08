@@ -42,3 +42,4 @@ Visit [http://localhost:4173](http://localhost:4173) in your browser.
 - Service worker currently caches core assets; bump `CACHE_NAME` in `service-worker.js` after large updates.
 - Audio and vibration prompts require user interaction and device support.
 - Respect accessibility preferences via the `prefers-reduced-motion` media query already included.
+- next time update, CMD shift R to update cache. 
