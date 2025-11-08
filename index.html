@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#f7c9d4" />
+  <title>Cute Egg Timer</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/egg-192.png" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&family=Nunito:wght@400;600&display=swap" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="aurora" aria-hidden="true">
+    <div class="blob blob-one"></div>
+    <div class="blob blob-two"></div>
+    <div class="blob blob-three"></div>
+  </div>
+
+  <div class="floaters" aria-hidden="true">
+    <span class="floater floater-one">🥚</span>
+    <span class="floater floater-two">🍳</span>
+    <span class="floater floater-three">🐣</span>
+  </div>
+
+  <main class="card" aria-live="polite">
+    <header>
+      <p class="eyebrow">Boil buddy</p>
+      <h1>Perfect egg every time</h1>
+      <p class="subtitle">Pick a yolk mood, tap start, and let the cute timer cheer you on.</p>
+    </header>
+
+    <section class="timer" aria-label="Egg timer">
+      <svg class="progress-ring" width="220" height="220" role="presentation">
+        <circle class="progress-ring__bg" cx="110" cy="110" r="100" />
+        <circle class="progress-ring__value" cx="110" cy="110" r="100" />
+      </svg>
+      <div class="timer-face">
+        <div class="egg-face">
+          <span class="eyes">• •</span>
+          <span class="mouth">︶</span>
+        </div>
+        <p id="timeDisplay" class="time-display">08:00</p>
+        <p id="statusText" class="status">Pick a doneness to begin</p>
+      </div>
+    </section>
+
+    <section class="presets" aria-label="Boiling presets">
+      <button class="chip" data-minutes="6" aria-pressed="false">Soft &amp; Jammy<br /><small>6 min</small></button>
+      <button class="chip" data-minutes="8" aria-pressed="true">Medium Laugh<br /><small>8 min</small></button>
+      <button class="chip" data-minutes="10" aria-pressed="false">Hard &amp; Heroic<br /><small>10 min</small></button>
+    </section>
+
+    <section class="custom" aria-label="Custom minutes">
+      <label for="customMinutes">Custom time: <span id="customLabel">8</span> min</label>
+      <input type="range" id="customMinutes" min="4" max="12" value="8" step="0.5" />
+    </section>
+
+    <section class="actions">
+      <button id="startBtn" class="primary">Start</button>
+      <button id="pauseBtn" class="secondary" disabled>Pause</button>
+      <button id="resetBtn" class="ghost" disabled>Reset</button>
+    </section>
+
+    <section class="options">
+      <label>
+        <input type="checkbox" id="soundToggle" checked />
+        Chime when done
+      </label>
+      <label>
+        <input type="checkbox" id="vibrateToggle" checked />
+        Gentle vibration (if supported)
+      </label>
+    </section>
+
+    <section class="notes">
+      <label for="noteField">Tasting notes</label>
+      <textarea id="noteField" rows="3" placeholder="e.g., 7.5 min was dreamy!"></textarea>
+      <p class="note-hint">Saved on this device so you remember your fave texture.</p>
+    </section>
+  </main>
+
+  <div id="confetti" aria-hidden="true"></div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
