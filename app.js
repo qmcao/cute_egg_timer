@@ -1,7 +1,4 @@
 const chips = document.querySelectorAll('.chip');
-const customMinutesInput = document.getElementById('customMinutes');
-const customSecondsInput = document.getElementById('customSeconds');
-const customHint = document.getElementById('customHint');
 const timeDisplay = document.getElementById('timeDisplay');
 const statusText = document.getElementById('statusText');
 const startBtn = document.getElementById('startBtn');
@@ -80,29 +77,6 @@ const setStatus = (text) => {
   statusText.textContent = text;
 };
 
-const clampSeconds = (seconds) => {
-  if (Number.isNaN(seconds)) return 0;
-  return Math.min(Math.max(seconds, 0), 59);
-};
-
-const minutesFromInputs = () => {
-  const mins = Math.max(0, Number(customMinutesInput.value) || 0);
-  const secs = clampSeconds(Number(customSecondsInput.value) || 0);
-  customSecondsInput.value = secs;
-  return mins + secs / 60;
-};
-
-const setCustomInputs = (minutes) => {
-  let mins = Math.floor(minutes);
-  let secs = Math.round((minutes - mins) * 60);
-  if (secs === 60) {
-    mins += 1;
-    secs = 0;
-  }
-  customMinutesInput.value = mins;
-  customSecondsInput.value = secs;
-};
-
 const selectPreset = (minutes) => {
   totalSeconds = Math.round(minutesToSeconds(minutes));
   remainingSeconds = totalSeconds;
@@ -111,7 +85,6 @@ const selectPreset = (minutes) => {
   chips.forEach((chip) => {
     chip.setAttribute('aria-pressed', chip.dataset.minutes === minutes.toString());
   });
-  setCustomInputs(minutes);
   stopTimer();
 };
 
@@ -242,7 +215,6 @@ chips.forEach((chip) => {
     chips.forEach((c) => c.setAttribute('aria-pressed', 'false'));
     chip.setAttribute('aria-pressed', 'true');
     const mins = Number(chip.dataset.minutes);
-    setCustomInputs(mins);
     pausedAt = 0;
     totalSeconds = minutesToSeconds(mins);
     remainingSeconds = totalSeconds;
@@ -253,22 +225,6 @@ chips.forEach((chip) => {
     timerId = null;
   });
 });
-
-const handleCustomInput = () => {
-  const minutes = minutesFromInputs();
-  chips.forEach((c) => c.setAttribute('aria-pressed', 'false'));
-  totalSeconds = minutesToSeconds(minutes);
-  remainingSeconds = totalSeconds;
-  pausedAt = 0;
-  updateDisplay();
-  setStatus('Custom time ready.');
-  resetBtn.disabled = true;
-  cancelAnimationFrame(timerId);
-  timerId = null;
-};
-
-customMinutesInput.addEventListener('input', handleCustomInput);
-customSecondsInput.addEventListener('input', handleCustomInput);
 
 startBtn.addEventListener('click', () => {
   if (remainingSeconds <= 0) {
@@ -287,17 +243,13 @@ resetBtn.disabled = true;
 
 if (isDebugMode) {
   document.body.classList.add('debug-mode');
-  if (customHint) customHint.textContent = 'minutes + seconds (scaled)';
   const banner = document.createElement('p');
   banner.className = 'debug-banner';
   banner.textContent = `Debug mode: timers scaled so medium preset ≈ ${Math.round(debugSeconds)} sec. Remove '?debug' to return to minutes.`;
   card?.insertAdjacentElement('afterbegin', banner);
   setStatus('Debug mode active — perfect for rapid testing.');
-} else if (customHint) {
-  customHint.textContent = 'minutes + seconds';
 }
 
-setCustomInputs(defaultMinutes);
 updateChipBadges();
 
 if ('serviceWorker' in navigator) {
