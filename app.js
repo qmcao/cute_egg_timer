@@ -1,6 +1,7 @@
 const chips = document.querySelectorAll('.chip');
 const customSlider = document.getElementById('customMinutes');
 const customLabel = document.getElementById('customLabel');
+const customUnit = document.getElementById('customUnit');
 const timeDisplay = document.getElementById('timeDisplay');
 const statusText = document.getElementById('statusText');
 const startBtn = document.getElementById('startBtn');
@@ -11,9 +12,23 @@ const vibrateToggle = document.getElementById('vibrateToggle');
 const noteField = document.getElementById('noteField');
 const confettiHolder = document.getElementById('confetti');
 const progressCircle = document.querySelector('.progress-ring__value');
+const card = document.querySelector('.card');
 
 const circumference = 2 * Math.PI * 100;
 progressCircle.style.strokeDasharray = `${circumference}`;
+
+const DEFAULT_MINUTES = 8;
+const DEFAULT_SECONDS = DEFAULT_MINUTES * 60;
+const DEBUG_DEFAULT_SECONDS = 10;
+const params = new URLSearchParams(window.location.search);
+const hasDebugParam = params.has('debug');
+const parsedDebugValue = Number(params.get('debug'));
+const debugSeconds =
+  hasDebugParam && Number.isFinite(parsedDebugValue) && parsedDebugValue > 0
+    ? parsedDebugValue
+    : DEBUG_DEFAULT_SECONDS;
+const isDebugMode = hasDebugParam;
+const timeScale = isDebugMode ? debugSeconds / DEFAULT_SECONDS : 1;
 
 const storageKey = 'cute-egg-note';
 noteField.value = localStorage.getItem(storageKey) || '';
@@ -21,7 +36,27 @@ noteField.addEventListener('input', () => {
   localStorage.setItem(storageKey, noteField.value.trim());
 });
 
-let totalSeconds = 8 * 60;
+const minutesToSeconds = (minutes) => minutes * 60 * timeScale;
+const formatMinutes = (minutes) => {
+  const rounded = Number(minutes);
+  return Number.isInteger(rounded) ? `${rounded}` : `${rounded.toFixed(1).replace(/\\.0$/, '')}`;
+};
+const setCustomLabelValue = (minutes) => {
+  customLabel.textContent = isDebugMode ? Math.round(minutesToSeconds(minutes)) : formatMinutes(minutes);
+};
+const updateChipBadges = () => {
+  chips.forEach((chip) => {
+    const tag = chip.querySelector('small');
+    if (!tag) return;
+    const minutes = Number(chip.dataset.minutes);
+    tag.textContent = isDebugMode ? `${Math.round(minutesToSeconds(minutes))} sec` : `${minutes} min`;
+  });
+};
+
+const activePreset = document.querySelector('.chip[aria-pressed=\"true\"]');
+const defaultMinutes = activePreset ? Number(activePreset.dataset.minutes) : DEFAULT_MINUTES;
+
+let totalSeconds = minutesToSeconds(defaultMinutes);
 let remainingSeconds = totalSeconds;
 let timerId = null;
 let startTimestamp = 0;
@@ -53,7 +88,7 @@ const setStatus = (text) => {
 };
 
 const selectPreset = (minutes) => {
-  totalSeconds = Math.round(minutes * 60);
+  totalSeconds = Math.round(minutesToSeconds(minutes));
   remainingSeconds = totalSeconds;
   updateDisplay();
   setStatus('Ready to bubble!');
@@ -61,7 +96,7 @@ const selectPreset = (minutes) => {
     chip.setAttribute('aria-pressed', chip.dataset.minutes === minutes.toString());
   });
   customSlider.value = minutes;
-  customLabel.textContent = minutes;
+  setCustomLabelValue(minutes);
   stopTimer();
 };
 
@@ -193,9 +228,9 @@ chips.forEach((chip) => {
     chip.setAttribute('aria-pressed', 'true');
     const mins = Number(chip.dataset.minutes);
     customSlider.value = mins;
-    customLabel.textContent = mins;
+    setCustomLabelValue(mins);
     pausedAt = 0;
-    totalSeconds = mins * 60;
+    totalSeconds = minutesToSeconds(mins);
     remainingSeconds = totalSeconds;
     updateDisplay();
     setStatus('Preset locked in!');
@@ -207,9 +242,9 @@ chips.forEach((chip) => {
 
 customSlider.addEventListener('input', (event) => {
   const mins = Number(event.target.value);
-  customLabel.textContent = mins;
+  setCustomLabelValue(mins);
   chips.forEach((c) => c.setAttribute('aria-pressed', 'false'));
-  totalSeconds = mins * 60;
+  totalSeconds = minutesToSeconds(mins);
   remainingSeconds = totalSeconds;
   pausedAt = 0;
   updateDisplay();
@@ -233,6 +268,22 @@ resetBtn.addEventListener('click', resetTimer);
 
 updateDisplay();
 resetBtn.disabled = true;
+
+if (isDebugMode) {
+  document.body.classList.add('debug-mode');
+  if (customUnit) customUnit.textContent = 'sec';
+  const banner = document.createElement('p');
+  banner.className = 'debug-banner';
+  banner.textContent = `Debug mode: timers scaled so medium preset ≈ ${Math.round(debugSeconds)} sec. Remove '?debug' to return to minutes.`;
+  card?.insertAdjacentElement('afterbegin', banner);
+  setStatus('Debug mode active — perfect for rapid testing.');
+} else if (customUnit) {
+  customUnit.textContent = 'min';
+}
+
+customSlider.value = defaultMinutes;
+setCustomLabelValue(defaultMinutes);
+updateChipBadges();
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {

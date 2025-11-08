@@ -21,6 +21,11 @@ python -m http.server 4173
 ```
 Visit [http://localhost:4173](http://localhost:4173) in your browser.
 
+## Debug / Fast Testing
+- Append `?debug=10` (or any positive number of seconds) to the URL to scale all timers so the medium preset lasts that many seconds.
+- Example: `http://localhost:4173?debug=10` makes presets/slider run in ~10 seconds; a banner appears to remind you you’re in debug mode.
+- Remove the query parameter to return to real-world minutes.
+
 ## Deploy & Install on Phone
 1. Upload the folder to any HTTPS static host (Netlify, Vercel, GitHub Pages + Cloudflare, etc.).
 2. After deployment, open the URL on your phone.
